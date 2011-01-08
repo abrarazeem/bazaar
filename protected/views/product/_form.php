@@ -30,7 +30,7 @@
 	
 	<div class="row">
 		
-		<?php echo $form->hiddenField($model,'shop_id',array('value'=>$_GET['sid'])); ?>
+		<?php echo $form->hiddenField($model,'shop_id',array('value'=>$_GET['id'])); ?>
 		
 	</div>
 

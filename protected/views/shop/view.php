@@ -7,10 +7,10 @@ $this->breadcrumbs=array(
 $this->menu=array(
 	array('label'=>'List Shops', 'url'=>array('index')),
 	array('label'=>'Create Shop', 'url'=>array('create')),
-	array('label'=>'Update Shop', 'url'=>array('update', 'id'=>$model->id)),
+	array('label'=>'Update Shop', 'url'=>array('update','id'=>$model->id)),
 	array('label'=>'Delete Shop', 'url'=>'#', 'linkOptions'=>array('submit'=>array('delete','id'=>$model->id),'confirm'=>'Are you sure you want to delete this item?')),
 	array('label'=>'Manage Shop', 'url'=>array('admin')),
-        array('label'=>'Add Product ', 'url'=>array('product/create','sid'=>$model->id)),
+        array('label'=>'Add Product ', 'url'=>array('product/create','id'=>$model->id)),
 );
 ?>
 

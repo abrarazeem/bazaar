@@ -52,7 +52,7 @@ class ProductController extends Controller
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
 				'actions'=>array('create','update'),
-				'users'=>array('@'),
+				'roles'=>array('owner'),
 			),
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
 				'actions'=>array('admin','delete'),
@@ -82,20 +82,27 @@ class ProductController extends Controller
 	public function actionCreate()
 	{
 		$model=new Product;
-
+		$shop = $this->loadShop($_GET['id']);
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
-
-		if(isset($_POST['Product']))
+if(Yii::app()->user->checkAccess('addOwnProduct',array('shop'=>$shop)))
+	{	if(isset($_POST['Product']))
 		{
 			$model->attributes=$_POST['Product'];
+				$model->image=CUploadedFile::getInstance($model, 'image');
 			if($model->save())
+				{
+					$model->image->saveAs(Yii::app()->basePath . '/../productImages/'.$model->image);
 				$this->redirect(array('view','id'=>$model->id));
+			}
 		}
 
 		$this->render('create',array(
 			'model'=>$model,
 		));
+	}
+	else
+	throw new CHttpException(403,'You can only add Product to Your shop only.');
 	}
 
 	/**
@@ -197,13 +204,13 @@ class ProductController extends Controller
         public function filterShopContext($filterChain)
         {
             $shopId = null;
-            if(isset ($_GET['sid']))
+            if(isset ($_GET['id']))
             {
-                $shopId  = $_GET['sid'];
+                $shopId  = $_GET['id'];
             }
             else
-                if(isset($_POST['sid']))
-                $shopId = $_POST['sid'];
+                if(isset($_POST['id']))
+                $shopId = $_POST['id'];
 
             $this->loadShop($shopId);
             

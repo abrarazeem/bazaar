@@ -70,7 +70,11 @@ class UserController extends Controller
 		{
 			$model->attributes=$_POST['User'];
 			if($model->save())
+                        {       $auth  = Yii::app ()->authManager;
+                                $auth->assign('owner',$model->id);
+                                Yii::app()->authManager->save();
 				$this->redirect(array('view','id'=>$model->id));
+                        }
 		}
 
 		$this->render('create',array(

@@ -42,12 +42,12 @@ class ShopController extends Controller
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('update','shopAdmin'),
-				'users'=>array('@'),
+				'actions'=>array('shopAdmin','delete'),
+				'roles'=>array('owner'),
 			),
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
-				'actions'=>array('admin','delete'),
-				'users'=>array('admin'),
+				'actions'=>array('update','admin'),
+				'roles'=>array('owner'),
 			),
 			array('deny',  // deny all users
 				'users'=>array('*'),
@@ -82,6 +82,7 @@ class ShopController extends Controller
 	 */
 	public function actionSignup()
 	{
+		$auth = Yii::app()->authManager;
 		$shop=new Shop;
 		$user = new User;
 		// Uncomment the following line if AJAX validation is needed
@@ -100,8 +101,9 @@ class ShopController extends Controller
              if($valid)
              {          
 			if($user->save())
-       		 $shop->user_id = $user->id;
-   		 	
+       		{ $shop->user_id = $user->id;
+   		 		$auth->assign('owner',$user->id);
+   		 	}
              if($shop->save())
                 { $shop->image->saveAs(Yii::app()->basePath . '/../images/'.$shop->image);
             	 }
@@ -122,21 +124,26 @@ class ShopController extends Controller
 	 */
 	public function actionUpdate($id)
 	{
-		$model=$this->loadModel($id);
-
+		$shop=$this->loadModel($id);
+		$user = User::model()->findByPk($shop->user_id);
+		if(Yii::app()->user->checkAccess('updateOwnShop',array('shop'=>$shop)))
+	{	
+		
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
-
 		if(isset($_POST['Shop']))
-		{
-			$model->attributes=$_POST['Shop'];
+		{		$model->attributes=$_POST['Shop'];
 			if($model->save())
-				$this->redirect(array('view','id'=>$model->id));
+				$this->redirect(array('view','id'=>$model->id));	
 		}
-
+		
 		$this->render('update',array(
-			'model'=>$model,
+			'shop'=>$shop,
+			'user'=>$user,
 		));
+	}
+	else
+		throw new CHttpException(403,'You can only Update Your own  shop.');
 	}
 
 	/**
@@ -146,7 +153,8 @@ class ShopController extends Controller
 	 */
 	public function actionDelete($id)
 	{
-		if(Yii::app()->request->isPostRequest)
+           
+            		if(Yii::app()->request->isPostRequest)
 		{
 			// we only allow deletion via POST request
 			$this->loadModel($id)->delete();
@@ -157,7 +165,9 @@ class ShopController extends Controller
 		}
 		else
 			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
-	}
+	
+
+        }
 
 	/**
 	 * Lists all models.
